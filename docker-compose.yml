@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Base de datos MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: prode-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: prode_k2_mundial
+      MYSQL_USER: ${DB_USERNAME:-prode_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-prode_pass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - prode-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Spring Boot
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: prode-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: prode_k2_mundial
+      DB_USERNAME: ${DB_USERNAME:-prode_user}
+      DB_PASSWORD: ${DB_PASSWORD:-prode_pass}
+      JWT_SECRET: ${JWT_SECRET:-K2RadioMundial2026SecretKeyForJWTTokenGenerationMustBeLongEnough256Bits}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "8080:8080"
+    networks:
+      - prode-network
+
+  # Frontend Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: prode-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL:-http://localhost:8080/api}
+    ports:
+      - "3000:3000"
+    networks:
+      - prode-network
+
+volumes:
+  mysql_data:
+
+networks:
+  prode-network:
+    driver: bridge

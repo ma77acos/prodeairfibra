@@ -1,0 +1,20 @@
+# Compilados y builds
+build/
+target/
+out/
+bin/
+*.class
+*.jar
+*.war
+
+# IDEs
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Logs
+*.log
+

@@ -1,0 +1,69 @@
+🚀 Optimizaciones CRÍTICAS para tu backend
+1. Redis para cachear el ranking (OBLIGATORIO)
+Java
+
+// En tu Spring Boot
+@Cacheable(value = "ranking", key = "'general'")
+public List<RankingDTO> obtenerRanking() {
+    // Esta query solo se ejecuta cada X tiempo
+    return rankingRepository.calcularRanking();
+}
+
+// application.properties
+spring.cache.type=redis
+spring.redis.host=localhost
+spring.redis.port=6379
+spring.cache.redis.time-to-live=60000  # 1 minuto
+Resultado: En vez de 500 queries pesadas, haces 1 cada minuto.
+
+2. Connection pooling para MySQL (OBLIGATORIO)
+properties
+
+# application.properties
+spring.datasource.hikari.maximum-pool-size=20
+spring.datasource.hikari.minimum-idle=5
+spring.datasource.hikari.connection-timeout=30000
+spring.datasource.hikari.idle-timeout=600000
+spring.datasource.hikari.max-lifetime=1800000
+3. Índices en MySQL (CRÍTICO)
+SQL
+
+-- Asumiendo tus tablas
+CREATE INDEX idx_usuario_partido ON pronosticos(usuario_id, partido_id);
+CREATE INDEX idx_partido_fecha ON partidos(fecha);
+CREATE INDEX idx_puntos_usuario ON puntos(usuario_id);
+
+-- Para el ranking
+CREATE INDEX idx_puntos_totales ON usuarios(puntos_totales);
+4. Calcular puntos de forma asíncrona
+Java
+
+@Async
+public void actualizarPuntajes(Long partidoId) {
+    // Esto se ejecuta en background, no bloquea la request
+    puntajesService.calcularParaPartido(partidoId);
+}
+5. Rate limiting (para protegerte de ataques)
+Java
+
+@RateLimiter(name = "ranking", fallbackMethod = "rankingFallback")
+public List<RankingDTO> obtenerRanking() {
+    // ...
+}
+
+// application.yml
+resilience4j.ratelimiter:
+  instances:
+    ranking:
+      limitForPeriod: 100  # 100 requests
+      limitRefreshPeriod: 1s
+      timeoutDuration: 0
+📈 ¿Qué números esperar después de optimizar?
+Con VPS 2 (8GB/2 cores) + Redis + índices:
+
+Métrica	Sin optimizar	Con optimizaciones
+Ranking con 1000 usuarios concurrentes	❌ Crash	✅ ~500ms
+Cargar pronóstico (50 req/s)	❌ Timeout	✅ ~200ms
+Pico post-partido (800 usuarios)	❌ 503 errors	✅ Funciona
+Uso de CPU	100%	40-60%
+Queries a MySQL/segundo	500+	5-10

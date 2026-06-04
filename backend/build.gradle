@@ -1,0 +1,102 @@
+plugins {
+    id 'java'
+    id 'war'
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.k2radio'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot Starters
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+
+    // MySQL Driver
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // H2 solo para tests
+    testRuntimeOnly 'com.h2database:h2'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // MapStruct (opcional)
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    // DevTools (opcional para desarrollo)
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+/*
+ * Mantenemos AMBOS artefactos:
+ * - bootWar -> para tu deploy actual en Tomcat
+ * - bootJar -> para empezar a probar deploy moderno con systemd
+ */
+tasks.named('bootJar') {
+    enabled = true
+    archiveBaseName = 'prode-airfibra'
+    archiveVersion = ''
+}
+
+tasks.named('bootWar') {
+    enabled = true
+    archiveBaseName = 'prode-airfibra'
+    archiveVersion = ''
+}
+
+// Task para generar el WAR con nombre personalizado
+tasks.register('warProd') {
+    dependsOn tasks.named('bootWar')
+    doLast {
+        println '✅ WAR generado para PRODUCCIÓN'
+        println '📦 Archivo: build/libs/prode-airfibra.war'
+    }
+}
+
+// Task para generar el JAR ejecutable
+tasks.register('jarProd') {
+    dependsOn tasks.named('bootJar')
+    doLast {
+        println '✅ JAR generado para PRODUCCIÓN'
+        println '📦 Archivo: build/libs/prode-airfibra.jar'
+        println '🚀 Ejecutar con: java -jar -Dspring.profiles.active=prod build/libs/prode-airfibra.jar'
+    }
+}
