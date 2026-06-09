@@ -31,13 +31,13 @@ public class EmailService {
     @Async
     public void sendVerificationEmail(User user) {
         try {
-            String subject = "Verificá tu cuenta - PRODE K2 Radio Mundial 2026";
+            String subject = "Verificá tu cuenta - Prode Airfibra Mundial 2026";
             String link = frontendUrl + "/verify-email?token=" + user.getVerificationToken();
 
             String content = buildEmailTemplate(
                     "Verificá tu cuenta",
                     "¡Hola " + user.getName() + "!",
-                    "Gracias por registrarte en el <strong>PRODE K2 Radio Mundial 2026</strong>.<br>" +
+                    "Gracias por registrarte en el <strong>Prode Airfibra Mundial 2026</strong>.<br>" +
                             "Para activar tu cuenta, hacé clic en el siguiente botón:",
                     "Verificar cuenta",
                     link,
@@ -58,7 +58,7 @@ public class EmailService {
     @Async
     public void sendPasswordResetEmail(User user) {
         try {
-            String subject = "Restablecer contraseña - PRODE K2 Radio Mundial 2026";
+            String subject = "Restablecer contraseña - Prode Airfibra Mundial 2026";
             String link = frontendUrl + "/reset-password?token=" + user.getResetPasswordToken();
 
             String content = buildEmailTemplate(
@@ -85,14 +85,14 @@ public class EmailService {
     @Async
     public void sendLeagueInvitation(User inviter, PrivateLeague league, String toEmail, String frontendUrl) {
         try {
-            String subject = "Te invitaron a una liga - PRODE K2 Radio Mundial 2026";
+            String subject = "Te invitaron a una liga - Prode Airfibra Mundial 2026";
             String link = frontendUrl + "/leagues/join/" + league.getCode();
 
             String content = buildEmailTemplate(
                     "Invitación a liga",
                     "¡Hola!",
                     "<strong>" + inviter.getName() + "</strong> te invitó a unirte a la liga " +
-                            "<strong>\"" + league.getName() + "\"</strong> en el PRODE K2 Radio Mundial 2026.<br><br>" +
+                            "<strong>\"" + league.getName() + "\"</strong> en el Prode Airfibra Mundial 2026.<br><br>" +
                             "O ingresá el código manualmente: <strong>" + league.getCode() + "</strong>",
                     "Unirme a la liga",
                     link,
@@ -117,7 +117,7 @@ public class EmailService {
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(htmlContent, true); // true = HTML habilitado
-        helper.setFrom(new InternetAddress(fromEmail, "PRODE K2 Radio"));
+        helper.setFrom(new InternetAddress(fromEmail, "Prode Airfibra"));
 
         mailSender.send(message);
     }
@@ -152,7 +152,7 @@ public class EmailService {
                                 <tr>
                                     <td style="background:#111827;padding:28px 40px;text-align:center;">
                                         <span style="color:#ffffff;font-size:22px;font-weight:bold;letter-spacing:1px;">
-                                            PRODE 🌍 K2 Radio 
+                                            Prode 🌍 Airfibra 
                                         </span>
                                     </td>
                                 </tr>
