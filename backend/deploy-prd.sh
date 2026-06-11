@@ -45,7 +45,8 @@ echo ""
 
 echo ""
 echo "🚀 Ejecutando deploy remoto..."
-ssh "$SERVER" "deploy $APP_NAME"
+
+ssh "$SERVER" "/opt/deploy/deploy.sh $APP_NAME"
 
 echo ""
 echo "✅ DEPLOY COMPLETO"
